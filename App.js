@@ -2,22 +2,31 @@ import * as React from "react";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, Button } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-// client id 173020442509-ult5qqvhtp2hp1h90e4vi41gas5glm0s.apps.googleusercontent.com
-// client secret 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
 import * as Google from "expo-auth-session/providers/google";
 import { makeRedirectUri } from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
+import Constants from "expo-constants";
 
 WebBrowser.maybeCompleteAuthSession();
 export default function App() {
   const [userInfo, setUserInfo] = React.useState(null);
+  const googleClientId =
+    Constants.expoConfig?.extra?.GOOGLE_CLIENT_ID ||
+    Constants.manifest?.extra?.GOOGLE_CLIENT_ID ||
+    process.env.GOOGLE_CLIENT_ID ||
+    "REPLACE_WITH_CLIENT_ID";
+
+  const redirectUri = makeRedirectUri({ useProxy: true });
+  console.log("GOOGLE_CLIENT_ID=", googleClientId);
+  console.log("Computed redirectUri=", redirectUri);
+
   const [request, response, promptAsync] = Google.useAuthRequest({
-    webClientId:
-      "173020442509-ult5qqvhtp2hp1h90e4vi41gas5glm0s.apps.googleusercontent.com",
-    redirectUri: makeRedirectUri({ useProxy: true }),
+    webClientId: googleClientId,
+    redirectUri: redirectUri,
   });
 
   React.useEffect(() => {
+    console.log("Auth response ->", response);
     handleSignInWithGoogle();
   }, [response]);
   async function handleSignInWithGoogle() {

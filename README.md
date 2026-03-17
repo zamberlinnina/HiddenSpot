@@ -1,4 +1,4 @@
-# HiddenSpot - mobilna aplikacija u sklopu LUMEN Development natjecanja
+# Hidden Spots - mobilna aplikacija u sklopu LUMEN Development natjecanja
 
 HiddenSpot je mobilna aplikacija koja pomoću GPS-a i kamere korisnicima otkriva skrivene i autentične lokacije u gradu. Aplikacija personalizira preporuke u stvarnom vremenu te omogućuje interaktivnu navigaciju i istraživanje manje poznatih mjesta.
 

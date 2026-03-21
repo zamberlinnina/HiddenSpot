@@ -10,14 +10,27 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
+import * as AuthSession from "expo-auth-session";
 
 WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen({ navigation }) {
   const [loading, setLoading] = React.useState(false);
 
+  const redirectUri = AuthSession.makeRedirectUri({
+    scheme: "hiddenspot",
+    path: "redirect",
+  });
+
+  console.log("REDIRECT URI:", redirectUri);
+  console.log("IOS CLIENT:", process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID);
+  console.log("WEB CLIENT:", process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID);
+  console.log("BACKEND URL:", process.env.EXPO_PUBLIC_BACKEND_URL);
+
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-    clientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || "",
+    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || "",
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || "",
+    redirectUri,
     scopes: ["openid", "profile", "email"],
   });
 
@@ -30,6 +43,7 @@ export default function LoginScreen({ navigation }) {
         Alert.alert("Login failed", "No id_token returned from Google.");
       }
     } else if (response?.type === "error") {
+      console.log("GOOGLE RESPONSE ERROR:", response);
       Alert.alert("Login error", "Google auth returned an error.");
     }
   }, [response]);
@@ -37,11 +51,14 @@ export default function LoginScreen({ navigation }) {
   const handleIdToken = async (idToken) => {
     setLoading(true);
     try {
-      const resp = await fetch("http://localhost:3000/auth/google", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_token: idToken }),
-      });
+      const resp = await fetch(
+        `${process.env.EXPO_PUBLIC_BACKEND_URL}/auth/google`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id_token: idToken }),
+        }
+      );
 
       const data = await resp.json();
 

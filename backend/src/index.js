@@ -9,10 +9,11 @@ app.use(express.json());
 app.use(cors());
 
 const PORT = process.env.PORT || 3000;
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_WEB_CLIENT_ID = process.env.GOOGLE_WEB_CLIENT_ID;
+const GOOGLE_IOS_CLIENT_ID = process.env.GOOGLE_IOS_CLIENT_ID;
 const JWT_SECRET = process.env.JWT_SECRET;
 
-const client = new OAuth2Client(GOOGLE_CLIENT_ID);
+const client = new OAuth2Client();
 
 const users = [];
 
@@ -26,7 +27,10 @@ app.post("/auth/google", async (req, res) => {
   try {
     const ticket = await client.verifyIdToken({
       idToken: id_token,
-      audience: GOOGLE_CLIENT_ID,
+       audience: [
+    process.env.GOOGLE_WEB_CLIENT_ID,
+    process.env.GOOGLE_IOS_CLIENT_ID,
+    ].filter(Boolean)
     });
 
     const payload = ticket.getPayload();
@@ -57,6 +61,6 @@ app.post("/auth/google", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server listening on http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server listening on http://0.0.0.0:${PORT}`);
 });
